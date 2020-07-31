@@ -74,7 +74,7 @@ app.get("/getallusers", (req, res) => {
 });
 
 app.get("/getallusersocketids", (req, res) => {
-  res.json(globalCache["userSockerIds"]);
+  res.json(globalCache["userSocketIds"]);
 });
 
 // TODO: Restructure and move out of app.js while maintaining use of global cache?
