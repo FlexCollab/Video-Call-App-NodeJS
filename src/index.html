@@ -41,8 +41,8 @@
         </div>
         
         
-        <nav class="navbar fixed-top bg-info rounded-0 d-print-none">
-            <div class="text-white">Video Call</div>
+        <nav class="navbar fixed-top rounded-0 d-print-none">
+            <div class="text-white">Atrium</div>
 
             <div class="pull-right room-comm" hidden>
                 <button class="btn btn-sm rounded-0 btn-no-effect" id='toggle-video' title="Hide Video">
@@ -87,7 +87,6 @@
                 </div>
 
                 <div class="col-12 col-md-4 offset-md-4 mb-3">
-                    <label for="your-name">Your Name</label>
                     <input type="text" id='your-name' class="form-control rounded-0" placeholder="Your Name">
                 </div>
 
@@ -103,7 +102,7 @@
 
         <div class="container-fluid" id='username-set' hidden>
             <div class="row">
-                <div class="col-12 h4 mt-5 text-center">Your Name</div>
+                <div class="col-12 h4 mt-5 text-center"></div>
             </div>
             
             <div class="row mt-2">
@@ -112,33 +111,31 @@
                 </div>
 
                 <div class="col-12 col-md-4 offset-md-4 mb-3">
-                    <label for="username">Your Name</label>
                     <input type="text" id='username' class="form-control rounded-0" placeholder="Your Name">
                 </div>
 
                 <div class="col-12 col-md-4 offset-md-4 mb-3">
-                    <button id='enter-room' class="btn btn-block rounded-0 btn-info">Enter Atrium</button>
+                    <button id='enter-room' class="btn btn-block rounded-0">Enter Atrium</button>
                 </div>
             </div>
         </div>
 
-        <div class="container" id="atrium">
-            <canvas id="mycanvas" width = "1000" height = "800"></canvas>
+        <div class="container-fluid" id="atrium">
+            <canvas id="mycanvas" height="850px" width="850px"></canvas>
         </div>
         
         <div class="container-fluid room-comm" hidden>
             <div class="row">
-                <video class="local-video mirror-mode" id='local' volume='0' autoplay muted></video>
+                <video class="col-md-offset-1 col-md-2 col-sm-3 col-xs-4 local-video mirror-mode" id='local' volume='0' autoplay muted></video>
+            </div>
+            <div class="row">
+                <div class="col-md-offset-1 col-md-2 col-sm-3 col-xs-4 remote-users" id='videos'></div>
             </div>
             
             <div class="row">
-                <div class="col-md-12 main" id='main-section'>                    
-                    <div class="row mt-2 mb-2" id='videos'></div>
-                </div>
-
-                <div class="col-md-3 chat-col d-print-none mb-2 bg-info" id='chat-pane' hidden>
+                <div class="col-md-3 chat-col d-print-none mb-2" id='chat-pane' hidden>
                     <div class="row">
-                        <div class="col-12 text-center h2 mb-3">CHAT</div>
+                        <div class="col-12 text-center h2 mb-3"></div>
                     </div>
 
                     <div id='chat-messages'></div>
