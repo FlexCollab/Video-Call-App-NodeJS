@@ -48,7 +48,7 @@ function init() {
         var x = event.pageX - canvas.offsetLeft,
             y = event.pageY - canvas.offsetTop;
         activeUsers.forEach(function(element) {
-            if (y > element.y && y < element.y + TOKEN_DIAMETER && x > element.x && x < element.x + TOKEN_DIAMETER) {
+            if (y > element.y && y < element.y + TOKEN_DIAMETER*2 && x > element.x && x < element.x + TOKEN_DIAMETER*2) {
                 //removeAreaGuest(element.x,element.y);
                 joinUserRoom(element.room);
             }
@@ -135,7 +135,7 @@ function joinUserRoom(room){
         }
     }
     if(found == 0) {
-      window.location.replace("/?"+'room='+room+'&joininguser='+user); 
+      window.location.replace("/?"+'room='+room+'&joininguser='+user);
     }
 
 }
@@ -163,5 +163,4 @@ function removeAreaGuest(x,y){
         ctx.ellipse(x, y, TOKEN_DIAMETER/2, TOKEN_DIAMETER/2, 0, 0, 360);
         ctx.fill();
         ctx.stroke();
-        onlineUsers++;
 }
