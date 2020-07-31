@@ -4,17 +4,19 @@ let onlineUsers = 0;
 let rowPos = 1;
 let rowOffset = 0;
 let columnPos = 0;
-let colors = ['red','green','blue'];
 let request = new XMLHttpRequest();
 let atrium;
+let activeUsers = [];
 
 const OFFSET_TOP = 200;
 const TOKEN_DIAMETER = 60;
 
-let LOBBY_AREA_FULL = false;
-let AREA_TWO_USED = false;
-let AREA_THREE_USED = false;
-let AREA_FOUR_USED = false;
+let occupied = {
+    LOBBY_AREA: false,
+    AREA_TWO: false,
+    AREA_THREE: false,
+    AREA_FOUR: false
+}
 
 let LOBBY_AREA;
 let AREA_TWO;
@@ -27,9 +29,9 @@ ctx = canvas.getContext('2d');
 
 //Quadrants
 LOBBY_AREA = [0,canvas.width*.5,OFFSET_TOP,(canvas.height-OFFSET_TOP)*.5];
-AREA_TWO = [canvas.width*.5,canvas.width,OFFSET_TOP,canvas.height*.5+OFFSET_TOP];
-AREA_THREE = [0,canvas.width*.5,canvas.height*.5+OFFSET_TOP,canvas.height];
-AREA_FOUR = [canvas.width*.5,canvas.width, canvas.height*.5+OFFSET_TOP, canvas.height];
+AREA_TWO = [canvas.width*.5,canvas.width,OFFSET_TOP,(canvas.height-OFFSET_TOP)*.5];
+AREA_THREE = [0,canvas.width*.5,(canvas.height+OFFSET_TOP)*.5,canvas.height];
+AREA_FOUR = [canvas.width*.5,canvas.width, (canvas.height+OFFSET_TOP)*.5, canvas.height];
 
 init();
 }
@@ -57,37 +59,68 @@ function init() {
 
 function addUsers(){
     for(room in atrium){
-        createLobbyGuest();
+        if(atrium[room][0]){
+            if(atrium[room].length == 1)
+            {   
+                createAreaGuest(LOBBY_AREA, atrium[room][0]["username"]);
+            }
+            else{
+                for (guest in atrium[room]){
+                    if(atrium[room][guest].hasOwnProperty("username")) {
+                        createAreaGuest(AREA_TWO,atrium[room][guest]["username"]);
+                    }
+                }
+            }
+        }
     }
 }
 
+function getRandomColor() {
+    color = "hsl(" + Math.random() * 360 + ", 100%, 75%)";
+    return color;
+}
 
-function createLobbyGuest(){
-    checkAndSetRowPosition();
-    if(!LOBBY_AREA_FULL)
+function createAreaGuest(areaType,userName){
+    checkAndSetRowPosition(areaType);
+    if(!occupied[areaType])
     {
-        var randomColor = colors[Math.floor(Math.random()*colors.length)];
-        ctx.fillStyle = randomColor;
+        ctx.fillStyle = getRandomColor();
+        ctx.strokeStyle = 'white';
         ctx.beginPath();
-        ctx.ellipse(TOKEN_DIAMETER*(rowPos), columnPos+OFFSET_TOP+TOKEN_DIAMETER, TOKEN_DIAMETER/2, TOKEN_DIAMETER/2, 0, 0, 360);
+        ctx.ellipse(areaType[0]+TOKEN_DIAMETER*(rowPos), areaType[2]+columnPos+TOKEN_DIAMETER, TOKEN_DIAMETER/2, TOKEN_DIAMETER/2, 0, 0, 360);
         ctx.fill();
         ctx.stroke();
+        ctx.fillStyle = 'black'
+        ctx.font = "20px Segoe UI";
+        ctx.fillText(userName.substring(0,2).toUpperCase(), areaType[0]+TOKEN_DIAMETER*(rowPos)-10, areaType[2]+columnPos+TOKEN_DIAMETER+5)
         onlineUsers++;
+        activeUsers.push({username: userName, x: areaType[0]+TOKEN_DIAMETER*(rowPos), y : areaType[2]+columnPos+TOKEN_DIAMETER})
     }
 }
 
-function checkAndSetRowPosition(){
+function checkAndSetRowPosition(areaCoords){
 
-    if(((rowPos)*TOKEN_DIAMETER) >= LOBBY_AREA[1]-TOKEN_DIAMETER) {
+    if(((rowPos)*TOKEN_DIAMETER) >= areaCoords[1]-TOKEN_DIAMETER) {
         rowOffset += rowPos;
         rowPos = 1;
         columnPos+=TOKEN_DIAMETER;
-        if(((columnPos)) >= LOBBY_AREA[3]-TOKEN_DIAMETER) {
+        if(((columnPos)) >= areaCoords[3]-TOKEN_DIAMETER) {
             console.log(columnPos+ "," + TOKEN_DIAMETER);
-            LOBBY_AREA_FULL = true;
+            occupied[areaCoords] = true;
         }
     }
     else{
         rowPos = onlineUsers+1 - rowOffset;
     }
+}
+
+function removeAreaGuest(){
+        ctx.fillStyle = 'white';
+        ctx.strokeStyle = 'white';
+        ctx.beginPath();
+        ctx.ellipse(activeUsers[activeUsers.length-1].x, activeUsers[activeUsers.length-1].y, TOKEN_DIAMETER/2, TOKEN_DIAMETER/2, 0, 0, 360);
+        ctx.fill();
+        ctx.stroke();
+        onlineUsers++;
+        activeUsers.pop();
 }
