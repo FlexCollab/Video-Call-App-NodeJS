@@ -36,11 +36,26 @@ AREA_FOUR = [canvas.width*.5,canvas.width, (canvas.height+OFFSET_TOP)*.5, canvas
 init();
 }
 
+
+
+
 document.addEventListener('DOMContentLoaded', function() {
     initAtrium();
 }, false);
 
 function init() {
+
+    canvas.addEventListener('click', function(event) {
+        var x = event.pageX - canvas.offsetLeft,
+            y = event.pageY - canvas.offsetTop;
+        activeUsers.forEach(function(element) {
+            if (y > element.y && y < element.y + TOKEN_DIAMETER && x > element.x && x < element.x + TOKEN_DIAMETER) {
+                //removeAreaGuest(element.x,element.y);
+                joinUserRoom(element.room);
+            }
+        });
+    
+    }, false);
     // //top of UI
     // ctx.fillRect(0, OFFSET_TOP, canvas.width, 2);
     // //left of UI
@@ -62,12 +77,12 @@ function addUsers(){
         if(atrium[room][0]){
             if(atrium[room].length == 1)
             {   
-                createAreaGuest(LOBBY_AREA, atrium[room][0]["username"]);
+                createAreaGuest(LOBBY_AREA, atrium[room][0]["username"],room);
             }
             else{
                 for (guest in atrium[room]){
                     if(atrium[room][guest].hasOwnProperty("username")) {
-                        createAreaGuest(AREA_TWO,atrium[room][guest]["username"]);
+                        createAreaGuest(AREA_TWO,atrium[room][guest]["username"],room);
                     }
                 }
             }
@@ -80,7 +95,7 @@ function getRandomColor() {
     return color;
 }
 
-function createAreaGuest(areaType,userName){
+function createAreaGuest(areaType,userName,room){
     checkAndSetRowPosition(areaType);
     if(!occupied[areaType])
     {
@@ -94,8 +109,14 @@ function createAreaGuest(areaType,userName){
         ctx.font = "20px Segoe UI";
         ctx.fillText(userName.substring(0,2).toUpperCase(), areaType[0]+TOKEN_DIAMETER*(rowPos)-10, areaType[2]+columnPos+TOKEN_DIAMETER+5)
         onlineUsers++;
-        activeUsers.push({username: userName, x: areaType[0]+TOKEN_DIAMETER*(rowPos), y : areaType[2]+columnPos+TOKEN_DIAMETER})
+        activeUsers.push({username: userName, room: room, x: areaType[0]+TOKEN_DIAMETER*(rowPos), y : areaType[2]+columnPos+TOKEN_DIAMETER})
     }
+}
+
+function joinUserRoom(room){
+
+    //make request to join room argument, navigate through active users to look for sessionStorage.getItem('username'), then connect to room
+
 }
 
 function checkAndSetRowPosition(areaCoords){
@@ -114,13 +135,12 @@ function checkAndSetRowPosition(areaCoords){
     }
 }
 
-function removeAreaGuest(){
+function removeAreaGuest(x,y){
         ctx.fillStyle = 'white';
         ctx.strokeStyle = 'white';
         ctx.beginPath();
-        ctx.ellipse(activeUsers[activeUsers.length-1].x, activeUsers[activeUsers.length-1].y, TOKEN_DIAMETER/2, TOKEN_DIAMETER/2, 0, 0, 360);
+        ctx.ellipse(x, y, TOKEN_DIAMETER/2, TOKEN_DIAMETER/2, 0, 0, 360);
         ctx.fill();
         ctx.stroke();
         onlineUsers++;
-        activeUsers.pop();
 }
