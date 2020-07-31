@@ -12,6 +12,7 @@ window.addEventListener( 'load', () => {
 
     if ( !username && !joininguser ) {
         document.querySelector( '#username-set' ).attributes.removeNamedItem( 'hidden' );
+        document.getElementById('atrium').style.visibility = 'hidden';
     }
 
     else {
@@ -20,6 +21,8 @@ window.addEventListener( 'load', () => {
         for ( let i = 0; i < commElem.length; i++ ) {
             commElem[i].attributes.removeNamedItem( 'hidden' );
         }
+
+        initAtrium();
 
         var partnerConnections = [];
 
@@ -47,7 +50,6 @@ window.addEventListener( 'load', () => {
             };
             console.log("Emit 'subscribe': "+JSON.stringify(subscribeData))
             socket.emit( 'subscribe', subscribeData);
-
 
             socket.on( 'new user', ( data ) => {
                 console.log("Received 'new user': "+JSON.stringify(data));
@@ -192,8 +194,6 @@ window.addEventListener( 'load', () => {
                 socket.emit( 'ice candidates', { candidate: candidate, to: partnerName, sender: socketId } );
             };
 
-
-
             //add
             partnerConnections[partnerName].ontrack = ( e ) => {
                 let str = e.streams[0];
@@ -235,11 +235,10 @@ window.addEventListener( 'load', () => {
                 switch ( partnerConnections[partnerName].iceConnectionState ) {
                     case 'disconnected':
                     case 'failed':
-                        helper.closeVideo( partnerName );
-                        break;
-
                     case 'closed':
+                        socket.emit( 'close', { candidate: candidate, to: partnerName, sender: socketId } );
                         helper.closeVideo( partnerName );
+
                         break;
                 }
             };
@@ -255,51 +254,6 @@ window.addEventListener( 'load', () => {
                 }
             };
         }
-
-
-
-        function shareScreen() {
-            helper.shareScreen().then( ( stream ) => {
-                helper.toggleShareIcons( true );
-
-                //disable the video toggle btns while sharing screen. This is to ensure clicking on the btn does not interfere with the screen sharing
-                //It will be enabled was user stopped sharing screen
-                helper.toggleVideoBtnDisabled( true );
-
-                //save my screen stream
-                screen = stream;
-
-                //share the new stream with all partners
-                broadcastNewTracks( stream, 'video', false );
-
-                //When the stop sharing button shown by the browser is clicked
-                screen.getVideoTracks()[0].addEventListener( 'ended', () => {
-                    stopSharingScreen();
-                } );
-            } ).catch( ( e ) => {
-                console.error( e );
-            } );
-        }
-
-
-
-        function stopSharingScreen() {
-            //enable video toggle btn
-            helper.toggleVideoBtnDisabled( false );
-
-            return new Promise( ( res, rej ) => {
-                screen.getTracks().length ? screen.getTracks().forEach( track => track.stop() ) : '';
-
-                res();
-            } ).then( () => {
-                helper.toggleShareIcons( false );
-                broadcastNewTracks( myStream, 'video' );
-            } ).catch( ( e ) => {
-                console.error( e );
-            } );
-        }
-
-
 
         function broadcastNewTracks( stream, type, mirrorMode = true ) {
             helper.setLocalStream( stream, mirrorMode );
@@ -424,72 +378,6 @@ window.addEventListener( 'load', () => {
             }
 
             broadcastNewTracks( myStream, 'audio' );
-        } );
-
-
-        //When user clicks the 'Share screen' button
-        document.getElementById( 'share-screen' ).addEventListener( 'click', ( e ) => {
-            e.preventDefault();
-
-            if ( screen && screen.getVideoTracks().length && screen.getVideoTracks()[0].readyState != 'ended' ) {
-                stopSharingScreen();
-            }
-
-            else {
-                shareScreen();
-            }
-        } );
-
-
-        //When record button is clicked
-        document.getElementById( 'record' ).addEventListener( 'click', ( e ) => {
-            /**
-             * Ask user what they want to record.
-             * Get the stream based on selection and start recording
-             */
-            if ( !mediaRecorder || mediaRecorder.state == 'inactive' ) {
-                helper.toggleModal( 'recording-options-modal', true );
-            }
-
-            else if ( mediaRecorder.state == 'paused' ) {
-                mediaRecorder.resume();
-            }
-
-            else if ( mediaRecorder.state == 'recording' ) {
-                mediaRecorder.stop();
-            }
-        } );
-
-
-        //When user choose to record screen
-        document.getElementById( 'record-screen' ).addEventListener( 'click', () => {
-            helper.toggleModal( 'recording-options-modal', false );
-
-            if ( screen && screen.getVideoTracks().length ) {
-                startRecording( screen );
-            }
-
-            else {
-                helper.shareScreen().then( ( screenStream ) => {
-                    startRecording( screenStream );
-                } ).catch( () => { } );
-            }
-        } );
-
-
-        //When user choose to record own video
-        document.getElementById( 'record-video' ).addEventListener( 'click', () => {
-            helper.toggleModal( 'recording-options-modal', false );
-
-            if ( myStream && myStream.getTracks().length ) {
-                startRecording( myStream );
-            }
-
-            else {
-                helper.getUserFullMedia().then( ( videoStream ) => {
-                    startRecording( videoStream );
-                } ).catch( () => { } );
-            }
         } );
     }
 } );

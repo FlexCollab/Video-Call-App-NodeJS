@@ -4,7 +4,6 @@ let onlineUsers = 0;
 let rowPos = 1;
 let rowOffset = 0;
 let columnPos = 0;
-let request = new XMLHttpRequest();
 let atrium;
 let activeUsers = [];
 
@@ -64,15 +63,22 @@ function init() {
     // ctx.fillRect(0, canvas.height-2, canvas.width, 2);
     // //right of UI
     // ctx.fillRect(canvas.width-2, OFFSET_TOP, 2, canvas.height);
+    addUsers();
+}
 
-    request.open('GET', 'getatrium', true)
-    request.onload = function() {
-        atrium = JSON.parse(this.response);
-    }
-    request.send();
+function getAtrium() {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+            atrium = JSON.parse(this.response);
+        }
+      };
+      xhttp.open("GET", "getatrium", true);
+      xhttp.send();
 }
 
 function addUsers(){
+    getAtrium();
     for(room in atrium){
         if(atrium[room][0]){
             if(atrium[room].length == 1)
@@ -116,6 +122,21 @@ function createAreaGuest(areaType,userName,room){
 function joinUserRoom(room){
 
     //make request to join room argument, navigate through active users to look for sessionStorage.getItem('username'), then connect to room
+    let user = sessionStorage.getItem('username');
+    console.log("clicked on " + room + "user " + user);
+    let found = 0;
+    for (guest in atrium[room]){
+        if(atrium[room][guest].hasOwnProperty("username")) {
+            if(atrium[room][guest]["username"]==user) {
+                console.log('User already in room');
+                found=1;
+                break;
+            }
+        }
+    }
+    if(found == 0) {
+      window.location.replace("/?"+'room='+room+'&joininguser='+user); 
+    }
 
 }
 

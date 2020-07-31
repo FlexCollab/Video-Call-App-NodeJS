@@ -116,6 +116,12 @@ const stream = (socket) => {
           .emit("sdp", { description: data.description, sender: data.sender });
   });
 
+  socket.on("close", (data) => {
+    console.log(data.to+" - Emitting 'close'");
+    socket.to(data.to)
+          .emit("close", { description: data.description, sender: data.sender });
+  });
+
   socket.on("ice candidates", (data) => {
     let candidateData = {
       candidate: data.candidate,
